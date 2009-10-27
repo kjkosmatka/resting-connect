@@ -55,13 +55,13 @@ function conn_regress(seed_timeseries, motion_params, output_base, regressors)
 	series_length = length(voi.data);
 	validate_series_length(motion, series_length);
 	for i = 1:length(regressors)
-		validate_series_length(regressors{i}, series_length);
+		validate_series_length(regressors(i), series_length);
 	end
 	
 	%% Compute derivatives and compile covariates
   covariates = [motion.data fodiff(motion.data)];
 	for i = 1:length(regressors)
-		covariates = [covariates regressors{i}.data fodiff(regressors{i}.data)];
+		covariates = [covariates regressors(i).data fodiff(regressors(i).data)];
 	end
 
   %% Create linear terms for regression
@@ -107,10 +107,10 @@ function loads=multi_load(filenames)
 % loads all files in the given cell array and returns a cell array of the 
 % loaded contents
 	loads = struct();
-	if ischar(filenames), filenames = { filenames };
+	if ischar(filenames), filenames = { filenames };, end;
 	
 	if iscellstr(filenames)
-		for 1:length(filenames)
+		for i = 1:length(filenames)
 			loads(i).filename = filenames{i};
 			loads(i).data = load(filenames{i});
 		end
