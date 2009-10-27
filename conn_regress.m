@@ -1,15 +1,17 @@
-function conn_regress(seed_timeseries, motion_params, output_base, regressors)
+function conn_regress(seed_timeseries, motion_params, regressors, output_base)
 % conn_regress.m 
 %		This script regresses out the selected effects from the seed region 
 %		and outputs text files that can be used in later voxel-wise regression
 %		models.
 %
-% Usage: conn_regress(seed_timeseries, motion_params, regressors={})
+% Usage: conn_regress(seed_timeseries, motion_params, regressors, output_base)
 %
 %		-- required arguments --
 %		seed_timeseries     file that contains the vector for the seed region
 %		motion_params       file that contains the motion parameters
 %		regressors          cell array of filenames that contain additional regressors
+%                                   required argument, but can be an empty cell array '{}' if desired.
+%		output_base         a base string from which output filenames will be built
 %
 % Outputs: 
 %		covariate file      Contains the covariates that were regressed from the
@@ -35,17 +37,17 @@ function conn_regress(seed_timeseries, motion_params, output_base, regressors)
 	p = inputParser;
 	p.addRequired('seed_timeseries', @(x)exist(x,'file') && ~isempty(strfind(x,'.txt')));
 	p.addRequired('motion_params', @(x)exist(x,'file'));
+	p.addRequired('regressors', @(x)files_exist(x));
 	p.addRequired('output_base', @(x)~exist(x,'file'));
-	p.addOptional('regressors',{}, @(x)files_exist(x));
 	try
-		p.parse(seed_timeseries, motion_params, output_base, regressors);
+		p.parse(seed_timeseries, motion_params, regressors, output_base);
 	catch exception
 		disp(['ERROR parsing: ' exception.message]); disp(' ');
 		help conn_regress
 		return
 	end
 	P=p.Results;
-	
+
 	%% load the timeseries data from the files
 	voi = multi_load(P.seed_timeseries);
 	motion = multi_load(P.motion_params);
@@ -76,8 +78,8 @@ function conn_regress(seed_timeseries, motion_params, output_base, regressors)
 	resid_tag = 'resid';
 	cov_file = [P.output_base '_' cov_tag '.txt'];
 	resid_file = [P.output_base '_' resid_tag '.txt'];
-	% dlmwrite(cov_file, covariates, ' ');
-  % dlmwrite(resid_file, R, ' ');
+	dlmwrite(cov_file, covariates, ' ');
+  dlmwrite(resid_file, R, ' ');
 end
 
 
@@ -106,7 +108,7 @@ end
 function loads=multi_load(filenames)
 % loads all files in the given cell array and returns a cell array of the 
 % loaded contents
-	loads = struct();
+	loads = struct([]);
 	if ischar(filenames), filenames = { filenames };, end;
 	
 	if iscellstr(filenames)
