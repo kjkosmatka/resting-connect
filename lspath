@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ `echo $# ` -ne 1 ]; then
+   echo "You must have one and only 1 input variable, which is your search pattern surrounded by qoutes (e.g. \"T*xls\")."
+   exit
+fi
+
+if echo "$1" | grep "\*" >> /dev/null; then 
+   echo >> /dev/null
+else if echo "$1" | grep "\?" >> /dev/null; then 
+   echo >> /dev/null
+else if echo "$1" | grep "\[*\]" >> /dev/null; then 
+   echo >> /dev/null
+else 
+   echo "You forgot qoutes at the beginning and end of the pattern"
+   echo "OR"
+   echo "This requires one and only one wild card character (e.g. * ? [])"
+   exit 
+fi
+fi
+fi
+
+
+USER=`whoami`
+if [ `pwd | awk -F/ '{print $3}' ` == $USER ]; then
+      wd=`pwd`
+      wd=${wd##/home/$USER}
+      wd=`echo "/Data"$wd`
+else
+      wd=`pwd`
+fi
+
+ls $wd/$1
